@@ -165,3 +165,64 @@ ggplot(data = diamonds) +
 ggplot(data = diamonds) + 
   geom_point(mapping = aes(x = cut, y = clarity), position = "jitter")
 ```
+
+## Workshop 3: GitHub Set Up
+(and for loops practice - from when I started before the workbook was finalised)
+
+### For loops
+```{r FOR LOOPS}
+#for (value in that){
+ # this
+#}
+
+#this is telling r to print "one run" for every value in c
+for (value in c("My", "first", "for", "loop")){
+  print("one run")
+  }
+
+#this is telling r to print the value of each entry in c
+for (value in c("My", "second", "for", "loop")){
+  print(value)  #can change print to anything
+  }
+
+my_list<- 1:50 
+print(my_list)
+str(my_list)
+
+#make a for loop
+for(i in my_list){   #heading of the for loop
+  result <- i
+  out <- paste0("I am printing loop number: ", i, ".")
+  print(out)
+  Sys.sleep(0.5) #this slows it down for us to see
+}
+print("For loop complete!")
+print("Program complete")
+
+#more complex
+print("This for loop will add 500 to each iteration")
+add_me<-500
+for(i in my_list){
+  result<- i + add_me
+  out<- paste0("Result of iteration: ", i, "=", result, ".")
+              print(out)
+}
+print("Complete!")
+
+```
+
+```{r NESTED FOR LOOPS}
+for(i in c(1,2,3,4,5)){  #for every iteration in the list
+  print(paste("I am base loop number:", i))   #print this
+ # Sys.sleep(0.8)  #slows down
+
+  for(j in c(1,2,3)){     #for every iteration in c
+    print(paste("...I am inside loop number:",j))   #print this
+    #Sys.sleep(0.8)
+  }  # this closes the loop, if you move it up before the next loop then it wouldn't be nested and just one after another
+}    
+```
+
+### Github Workflow
+
+Edit → Save → Stage → Commit → Pull → Push
