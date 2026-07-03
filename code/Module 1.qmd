@@ -21,6 +21,7 @@ library("ggplot2")
 ```
 
 ### Graphing Template
+
 ```{r graphing template}
 #ggplot(data=<DATA>) +
   #<GEOM_FUNCTION>(mapping=aes(<XYMAPPINGS))
@@ -41,6 +42,7 @@ library("ggplot2")
 ```
 
 ### Practice Plots
+
 ```{r practice plots}
 ggplot(data=mpg) +
   geom_point(mapping=aes(x=displ, y=hwy, shape=class))
@@ -98,8 +100,9 @@ ggplot() +
   geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
 #and they are!
 ```
- 
+
 ### Transformations
+
 ```{r transformations}
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut))
@@ -134,6 +137,7 @@ ggplot(data = diamonds) +
 ```
 
 ### Aesthetics
+
 ```{r Aesthetic Adjustments}
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut, colour = cut)) #colour just changes the outline
@@ -167,9 +171,11 @@ ggplot(data = diamonds) +
 ```
 
 ## Workshop 3: GitHub Set Up
+
 (and for loops practice - from when I started before the workbook was finalised)
 
 ### For loops
+
 ```{r FOR LOOPS}
 #for (value in that){
  # this
@@ -227,9 +233,10 @@ for(i in c(1,2,3,4,5)){  #for every iteration in the list
 
 Edit → Save → Stage → Commit → Pull → Push
 
-## Workshop 4: Developer's Toolbox and AI 
+## Workshop 4: Developer's Toolbox and AI
 
 ### Packages
+
 ```{r}
 library(ellmer)
 library(chattr)
@@ -237,17 +244,12 @@ library(chattr)
 
 ### API Key
 
-Add these to the console
-    usethis::edit_r_environ()
-    run: GEMINI_API_KEY="your key here"
-    usethis::edit_r_profile()
-    run: options(.chattr_chat = ellmer::chat_google_gemini())
-You have to save and restart r after each of these actions. stores them in the environment and profile instead of my actual code
+Add these to the console usethis::edit_r_environ() run: GEMINI_API_KEY="your key here" usethis::edit_r_profile() run: options(.chattr_chat = ellmer::chat_google_gemini()) You have to save and restart r after each of these actions. stores them in the environment and profile instead of my actual code
 
 #### Restart session: ctrl + shift + F10
 
-
 ### Chattr
+
 ```{r practicing chattr}
 # ctrl + o opens chat
 # prompt:show me the code to make a scatter plot showing the relationship between size and clarity of diamonds in the diamonds base data set 
@@ -260,6 +262,7 @@ ggplot(data = diamonds, aes(x = carat, y = clarity)) +
 ```
 
 ### Inline Copilot
+
 ```{r practicing inline copilot}
 #Load tidyverse and palmerpenguins libraries
 library(tidyverse)
@@ -325,10 +328,12 @@ ggplot(data = penguins, aes(x = island, y = flipper_len, fill = species)) +
        fill = "Species")
 ```
 
-I tried a couple different plots using different levels of copilot to help me out. I think option D is the best, even though it is not technically faceted. I think it is more visually appealing and easier to read than the other options. 
+I tried a couple different plots using different levels of copilot to help me out. I think option D is the best, even though it is not technically faceted. I think it is more visually appealing and easier to read than the other options.
 
 ### Conditional Logic
+
 The classic base R conditional structure screens a single value at a time. Its basic anatomy uses round brackets () for the logical condition and curly braces {} for the action if that condition is true. Base r basic conditional logic only works for one value, can't use vectors.
+
 ```{r practice}
 # Simple Example: Checking Sea Surface Temperature (SST)
 sst <- 30.2
@@ -341,6 +346,7 @@ if (sst > 29.5) {
 ```
 
 ### Evaluate Columns
+
 ```{r}
 # Sample coral data
 coral_monitoring <- tibble(
@@ -356,6 +362,3 @@ coral_monitoring <- tibble(
 # mutate: add a new column
 # %>%: pipe one variable/object to a function
 ```
-
-
-

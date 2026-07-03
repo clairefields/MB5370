@@ -1,0 +1,275 @@
+---
+title: "Module 2"
+author: "Claire Fields"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE}
+# Set options, housekeeping
+knitr::opts_chunk$set(
+	echo = FALSE,
+	include = TRUE,
+	message = FALSE,
+	warning = FALSE)
+```
+
+# Workshop 2
+
+Here we are going to be wrangling in messy data on the Ross River estuary fish surveys and produce final clean tables and figure. We have 4 separate files to wrangle in and use
+
+## Housekeeping
+
+```{r housekeeping}
+#| message: true
+#| warning: false
+rm(list = ls())
+
+#This clears the environment just in case something is remaining
+```
+
+## Packages
+
+```{r}
+library(tidyverse) # Inc dplyr, ggplot2, lubridate etc
+library(readxl) # For reading in excel files
+```
+
+## Load files
+
+### Main dataset
+
+The catch data is split across 4 tabs in one excel file Load individually
+
+```{r}
+catch1 <- read_excel(here::here("data/estuary_catch_log.xlsx"), sheet = 1)
+catch2 <- read_excel("../data/estuary_catch_log.xlsx", sheet = 2)
+catch3 <- read_excel("../data/estuary_catch_log.xlsx", sheet = 3)
+catch4 <- read_excel("../data/estuary_catch_log.xlsx", sheet = 4)
+```
+
+```{r}
+#inspect these tabs
+catch1
+catch2
+catch3
+catch4
+```
+
+## Consolidate
+
+```{r}
+catch_data <- bind_rows(catch1, catch2, catch3, catch4)
+# Clean up the environment
+rm(catch1, catch2, catch3, catch4) # Clean up the environment
+```
+
+```{r}
+catch_data
+head(catch_data)
+glimpse(catch_data)
+str(catch_data)
+catch_data|>
+  distinct(species)
+catch_data|>
+  distinct(site)
+```
+
+##### Data Info:
+
+-   four species but they are in common names and inconsistent
+-   four sites but they are not consistently written
+
+## Load in other data
+
+```{r}
+metadata<-read_csv("../data/estuary_metadata.csv")
+dictionary<-read_csv("../data/species_dictionary.csv")
+sonde_raw<-read_csv("../data/estuary_sonde_data.csv")
+summary(sonde_raw)
+```
+
+```{r}
+catch_data <- catch_data |>
+  mutate(
+    site = str_to_lower(str_trim(site)),
+    site = str_replace_all(site, " ", "_")) |> 
+  # Convert all chr to fct
+  mutate(across(where(is.character), as_factor),
+    species = str_to_lower(str_trim(species)),
+    species = str_replace_all(species," ", "_")
+  )
+
+metadata <- metadata |>
+  mutate(
+    site_name = str_to_lower(str_trim(site_name)),
+    site_name = str_replace_all(site_name, " ", "_")) |> 
+  # Convert all chr to fct
+  mutate(across(where(is.character), as_factor)
+  )
+
+# Taxonomic Translation
+catch_data<- catch_data |>
+  left_join(dictionary, by=join_by(species==common_name))
+```
+
+#### Notes:
+
+-   changed all the naming issues
+-   Environmental variables look like they are mostly in good shape (all numeric), however the turbidity data has a failed value (-999) so we'll need to deal with that
+
+## Fix up the sonde data
+
+```{r}
+sonde<-sonde_raw|>
+  mutate(
+    # Parse the messy character string
+    datetime=dmy_hm(timestamp),
+    # Convert 999 to NA
+    turbidity = na_if(turbidity, -999),
+    # Convert negative salinity to NA
+    salinity = ifelse(salinity < 0, NA, salinity),
+    # in salinity = if salinity is less than zero make it NA if not keep it salinity
+  )
+# Because our catch data is on a daily basis we don't really care about having the date time split into 15 minute measurements. maybe we just get the mean with standard deviation
+# Summarise 15-minute sonde data into daily means
+sonde <- sonde |>
+  mutate(  
+    date = as_date(floor_date(datetime, "day")), # as_date changes it to the date format rather than the dttm (date time)
+  ) |>
+  group_by(site, date) |>
+  summarise(
+    mean_temp = mean(temperature, na.rm = TRUE),
+    mean_salinity = mean(salinity, na.rm = TRUE),
+    .groups = "drop"
+  )
+# join it to the catch data
+catch_data<- catch_data |>
+  left_join(metadata, by = join_by(site == site_name)) |>
+  left_join(sonde, by=join_by(site,date))
+# 
+```
+
+#### Notes
+
+-   Salinity had negative values we deleted
+-   Turbidity had NAs we removed
+-   We changed from 15 minute intervals to daily average for our sonde readings, but dropped turbidity because it is not relevant to our hypothesis
+-   student did not include their zero counts, we need to add them in 4 sites, 4 species, 30 days (4*4*30 = 480 observations expected)
+
+## Implicit zeros
+
+```{r}
+catch_data<-catch_data |>
+  complete(
+    nesting(site, date, lat, lon, zone, mean_temp, mean_salinity), scientific_name) |>
+  mutate(
+    count=coalesce(count,0))
+```
+
+Data wrangling complete!
+
+## Phase 4: Statistical Exploration
+
+```{r}
+# Are there differences in environmental variables among zones? Otherwise, what is the point in testing their effect?
+
+# Salinity
+salinity_summary <-
+  catch_data|>
+  group_by(zone) |>
+  summarise(
+    sem_salinity = sd(mean_salinity) / sqrt(n()),
+    sd_salinity = sd(mean_salinity, na.rm = TRUE),
+    median_salinity = median(mean_salinity, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+#plot
+salinity_summary |> 
+  ggplot(aes(x = zone, y = median_salinity)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = median_salinity - sd_salinity, ymax = median_salinity + sd_salinity), width = 0.2) +
+  theme_minimal() +
+  labs(#title = "Median Salinity by Zone with Standard Deviation Error Bars",
+       x = "Zone",
+       y = "Median Salinity (ppt)")
+
+# Temperature
+temperature_summary <- 
+  catch_data |>
+  group_by(zone) |>
+  summarise(
+    sd_temperature = sd(mean_temp, na.rm = TRUE),
+    median_temperature = median(mean_temp, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+temperature_summary |>
+  ggplot(aes(x = zone, y = median_temperature)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = median_temperature - sd_temperature, ymax = median_temperature + sd_temperature), width = 0.2) +
+  theme_minimal() +
+  labs(#title = "Median Temperature by Zone with Standard Deviation Error Bars",
+       x = "Zone",
+       y = "Median Temperature (°C)")
+```
+
+#### Notes
+
+Not a huge difference in temperature, but salinity has clear differences among zones.
+
+```{r}
+# Nice publication friendly plot
+
+#| fig-cap: "Salinity Gradient across zones. Ross River Estuary System, Townsville, NQ, Australia May 2026."
+
+salinity_summary |> 
+  ggplot(aes(x = zone, y = median_salinity)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = median_salinity - sd_salinity, ymax = median_salinity + sd_salinity), width = 0.2) +
+  theme_minimal() +
+  labs(#title = "Median Salinity by Zone with Standard Deviation Error Bars",
+       x = "Zone",
+       y = "Median Salinity (ppt)")
+
+# abundance patterns
+fish_stats <- catch_data |>
+  group_by(zone, scientific_name) |>
+  summarise(
+    mean_catch = mean(count),
+    sem_catch = sd(count) / sqrt(n()),
+    .groups = "drop"
+  )
+```
+
+## Phase 5: Visual Communication
+
+```{r}
+fish_stats |> 
+  ggplot(aes(x = zone, y = mean_catch, fill = scientific_name)) +
+  geom_line(group = 1) +
+  # add in points from master data
+  geom_point(data = catch_data, aes(x = zone, y = count),
+             position = position_jitter(width = 0.2), alpha = 0.2, size = 1, inherit.aes = FALSE) + 
+  geom_point(position = "dodge", size = 4, pch = 23) +
+  # SE pretty narrow, potentially not worth plotting but let's viewer see that included
+  geom_errorbar(aes(ymin = mean_catch - sem_catch, ymax = mean_catch + sem_catch), 
+                position = position_dodge(0.9), width = 0.2) + 
+  facet_wrap(~ scientific_name, scales = "fixed") +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "italic", size = 10, colour = "grey20"), # spp names in italic
+   # legend.position = "bottom"
+    legend.position = "none" # legend unnecessary
+  ) +
+  labs(
+    #title = "Predatory Fish Abundance across Estuarine Salinity Gradients", # default ggplot title appears on top
+    #subtitle = "Ross River Estuary System, May 2026",
+    x = "Spatial Zone",
+    # scientific label for y axis of n day -1 use regex to get superscript
+    y = expression("Abundance (n day"^-1*")"),
+  #  y = "Daily abundance (n day^-1)"
+    y = "Abundance (per day)"
+  )
+```
