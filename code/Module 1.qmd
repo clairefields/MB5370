@@ -273,7 +273,7 @@ library(palmerpenguins)
 #plot bill_len on the x axis and bill_dep on the y axis
 #color points by species and use geom_point with size 3
 #add a minimal theme and clean labels
-ggplot(data = penguins, aes(x = bill_len, y = bill_dep, color = species)) +
+ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
   geom_point(size = 3) +
   theme_minimal() +
   labs(title = "Bill Length vs Bill Depth of Penguins",
@@ -287,7 +287,7 @@ ggplot(data = penguins, aes(x = bill_len, y = bill_dep, color = species)) +
 ```{r}
 #option A
 # please create a boxplot that compares flipper length across different species, faceted by island, use custom color palettes
-ggplot(data = penguins, aes(x = species, y = flipper_len, fill = island)) +
+ggplot(data = penguins, aes(x = species, y = flipper_length_mm, fill = island)) +
   geom_boxplot() +
   scale_fill_manual(values = c("Biscoe" = "lightblue", "Dream" = "lightgreen", "Torgersen" = "lightpink")) +
   theme_minimal() +
@@ -298,7 +298,7 @@ ggplot(data = penguins, aes(x = species, y = flipper_len, fill = island)) +
 
 # option b
 #generate a boxplot comparing flipper_len across different species, faceted by island, using custom color palettes. i would like the island names to be along the x axis and no labels for the species other than the fill
-ggplot(data = penguins, aes(x = island, y = flipper_len, fill = species)) +
+ggplot(data = penguins, aes(x = island, y = flipper_length_mm, fill = species)) +
   geom_boxplot() +
   facet_wrap(~ species) +
   scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
@@ -308,7 +308,7 @@ ggplot(data = penguins, aes(x = island, y = flipper_len, fill = species)) +
        y = "Flipper Length (mm)",
        fill = "Species")
 # option c
-ggplot(data = penguins, aes(x = species, y = flipper_len, fill = species)) +
+ggplot(data = penguins, aes(x = species, y = flipper_length_mm, fill = species)) +
   geom_boxplot() +
   facet_wrap(~ island) +
   scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
@@ -318,7 +318,7 @@ ggplot(data = penguins, aes(x = species, y = flipper_len, fill = species)) +
        y = "Flipper Length (mm)",
        fill = "Species")
 # option d
-ggplot(data = penguins, aes(x = island, y = flipper_len, fill = species)) +
+ggplot(data = penguins, aes(x = island, y = flipper_length_mm, fill = species)) +
   geom_boxplot() +
   scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
   theme_minimal() +
