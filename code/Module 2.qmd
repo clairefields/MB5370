@@ -38,7 +38,6 @@ acoustic_stream <- read_tsv(here::here("data/workshop1/acoustic_telemetry_stream
 fisheries_annual <- read_excel(here::here("data/workshop1/fish_catch_data.xlsx"), sheet = "Commercial_2026")
 ```
 
-
 ## Read in mangrove_data
 
 ```{r}
@@ -66,6 +65,7 @@ print(benthic_cover)
 ```
 
 ## Wrangling with Palmer Penguins
+
 ```{r}
 library(palmerpenguins) 
 data("penguins")
@@ -130,16 +130,19 @@ stratified_morphology <- arrange(penguins, species, desc(bill_length_mm))
 ```
 
 ## Pipe operator
+
 ```{r}
 penguins_final \<- penguins \|\> mutate(bill_ratio = bill_length_mm / bill_depth_mm) \|\> filter(species == "Adelie")
 ```
 
 ## Mutate
+
 ```{r}
 penguin_ratios \<- penguins \|\> mutate(body_mass_kg = body_mass_g / 1000, \# Convert grams to kilograms bill_ratio = bill_length_mm / bill_depth_mm \# Bill ratio ) glimpse(penguin_ratios)
 ```
 
 ## Data Aggregation
+
 ```{r}
 # Grouping our active memory penguins by species
 
@@ -168,6 +171,34 @@ biological_signal <- penguins %>%
 
 print(biological_signal)
 ```
+
+## Piping Directly to Visualisaton
+
+```{r}
+# Pipe directly from aggregation to plotting with error bars
+mass_compare_plot <- penguins |>
+  group_by(species, island) |>
+  summarise(
+    mean_mass = mean(body_mass_g, na.rm = TRUE),
+    sd_mass = sd(body_mass_g, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  ggplot(aes(x = species, y = mean_mass, colour = island)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = mean_mass - sd_mass, 
+                    ymax = mean_mass + sd_mass), 
+                width = 0.2) +
+  labs(title = "Mean Body Mass by Species and Island",
+       subtitle = "Error bars represent standard deviation",
+       y = "Mean Body Mass (g)",
+       x = "Species") +
+  theme_minimal()
+
+mass_compare_plot
+```
+
+This plot is telling us that the mean body mass seems to be different for the different species, and that the islands are distinct in what species may be present. A statistical test could tell us if there is a significant difference between the species' body masses. 
 
 # Workshop 2: Keystone Exercise
 
