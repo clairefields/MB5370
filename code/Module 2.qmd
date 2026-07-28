@@ -132,13 +132,21 @@ stratified_morphology <- arrange(penguins, species, desc(bill_length_mm))
 ## Pipe operator
 
 ```{r}
-penguins_final \<- penguins \|\> mutate(bill_ratio = bill_length_mm / bill_depth_mm) \|\> filter(species == "Adelie")
+penguins_final <- penguins %>%
+  mutate(bill_ratio = bill_length_mm / bill_depth_mm) %>%
+  filter(species == "Adelie")
 ```
 
 ## Mutate
 
 ```{r}
-penguin_ratios \<- penguins \|\> mutate(body_mass_kg = body_mass_g / 1000, \# Convert grams to kilograms bill_ratio = bill_length_mm / bill_depth_mm \# Bill ratio ) glimpse(penguin_ratios)
+penguin_ratios <- penguins %>%
+  mutate(
+    body_mass_kg = body_mass_g / 1000,  # Convert grams to kilograms
+    bill_ratio = bill_length_mm / bill_depth_mm  # Bill ratio
+  )
+
+glimpse(penguin_ratios)
 ```
 
 ## Data Aggregation
