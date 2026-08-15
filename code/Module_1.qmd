@@ -1,0 +1,365 @@
+---
+title: "Module 1"
+author: "Claire Fields"
+format: html
+editor: visual
+warning: false
+---
+
+## Workshop 1
+
+```{r}
+source("Workshop 1.R")
+```
+
+## Workshop 2: Data Visualisations
+
+### Install Packages
+
+```{r}
+library("tidyverse")
+library("ggplot2")
+```
+
+### Graphing Template
+
+```{r graphing template}
+#ggplot(data=<DATA>) +
+  #<GEOM_FUNCTION>(mapping=aes(<XYMAPPINGS))
+# geom is how you represent your data
+#point, line, smooth
+#aes indicates the aesthetics, include x and y here
+#add colour = z to map z to colour (changes colour based on class)
+#alpha=transparency, colour, size, shape
+
+#updated at the end of workshop 2:
+#ggplot(data = <DATA>) + 
+ # <GEOM_FUNCTION>(
+  #   mapping = aes(<MAPPINGS>),
+   #  stat = <STAT>, 
+    # position = <POSITION>
+#  ) +
+ # <FACET_FUNCTION>
+```
+
+### Practice Plots
+
+```{r practice plots}
+ggplot(data=mpg) +
+  geom_point(mapping=aes(x=displ, y=hwy, shape=class))
+
+#a question to try out
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ,y=hwy, colour=displ<5))
+```
+
+```{r facet and panel plots}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(. ~ cyl)
+#facet_grid   separate variables by ~ if you only want one use a .
+#nrow is number of rows, ncol is number of columns
+```
+
+```{r lines}
+ggplot(data = mpg) + 
+  # geom_point(mapping=aes(x=displ,y=highway)) #points look bad
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+
+ ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, colour = drv), show.legend = FALSE)
+#can add group= to group the data but it doesnt add a legend,
+ 
+ ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+ #not ideal because it increase the chance of a mistype if you go to change things
+ 
+#instead:
+ ggplot(data = mpg, mapping=aes(x=displ,y=hwy)) + #makes mappings global to the plot
+  geom_point()+
+   geom_smooth()
+ # you can individually add aesthetics to each geom
+ 
+ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
+
+ #filter means you are only showing subcompact cars on the line
+ 
+ #these should be the same
+ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+#and they are!
+```
+
+### Transformations
+
+```{r transformations}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+
+
+#override a default stat
+demo <- tribble(
+  ~cut,         ~freq,
+  "Fair",       1610,
+  "Good",       4906,
+  "Very Good",  12082,
+  "Premium",    13791,
+  "Ideal",      21551
+)
+demo
+
+ggplot(data = demo) +
+  geom_bar(mapping = aes(x = cut, y = freq), stat = "identity")
+
+#override into proportions
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = stat(prop), group = 1))
+
+#improve transparency by using stat_summary
+ggplot(data = diamonds) + 
+  stat_summary(
+    mapping = aes(x = cut, y = depth),
+    fun.min = min,
+    fun.max = max,
+    fun = median
+  )
+```
+
+### Aesthetics
+
+```{r Aesthetic Adjustments}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, colour = cut)) #colour just changes the outline
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = cut)) #fill actually fills in the shape
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity)) #breaks the cut into clarity
+
+#position adjustments: identity = raw data, fill = changes height, dodge = forces ggplot2 to not put things on top of eachother
+
+#change transparancy with alpha
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+  geom_bar(alpha = 1/5, position = "identity")
+
+#color outlines with no fill
+ggplot(data = diamonds, mapping = aes(x = cut, colour = clarity)) + 
+  geom_bar(fill = NA, position = "identity")
+
+
+#position fill means that you make all the stacks the same height, showing more of a percentage instead of actual count
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+
+# dodge moves them side by side
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+
+# jitter slightly move the points
+ggplot(data = diamonds) + 
+  geom_point(mapping = aes(x = cut, y = clarity), position = "jitter")
+```
+
+## Workshop 3: GitHub Set Up
+
+(and for loops practice - from when I started before the workbook was finalised)
+
+### For loops
+
+```{r FOR LOOPS}
+#for (value in that){
+ # this
+#}
+
+#this is telling r to print "one run" for every value in c
+for (value in c("My", "first", "for", "loop")){
+  print("one run")
+  }
+
+#this is telling r to print the value of each entry in c
+for (value in c("My", "second", "for", "loop")){
+  print(value)  #can change print to anything
+  }
+
+my_list<- 1:50 
+print(my_list)
+str(my_list)
+
+#make a for loop
+for(i in my_list){   #heading of the for loop
+  result <- i
+  out <- paste0("I am printing loop number: ", i, ".")
+  print(out)
+  Sys.sleep(0.5) #this slows it down for us to see
+}
+print("For loop complete!")
+print("Program complete")
+
+#more complex
+print("This for loop will add 500 to each iteration")
+add_me<-500
+for(i in my_list){
+  result<- i + add_me
+  out<- paste0("Result of iteration: ", i, "=", result, ".")
+              print(out)
+}
+print("Complete!")
+
+```
+
+```{r NESTED FOR LOOPS}
+for(i in c(1,2,3,4,5)){  #for every iteration in the list
+  print(paste("I am base loop number:", i))   #print this
+ # Sys.sleep(0.8)  #slows down
+
+  for(j in c(1,2,3)){     #for every iteration in c
+    print(paste("...I am inside loop number:",j))   #print this
+    #Sys.sleep(0.8)
+  }  # this closes the loop, if you move it up before the next loop then it wouldn't be nested and just one after another
+}    
+```
+
+### Github Workflow
+
+Edit → Save → Stage → Commit → Pull → Push
+
+## Workshop 4: Developer's Toolbox and AI
+
+### Packages
+
+```{r}
+library(ellmer)
+library(chattr)
+```
+
+### API Key
+
+Add these to the console usethis::edit_r_environ() run: GEMINI_API_KEY="your key here" usethis::edit_r_profile() run: options(.chattr_chat = ellmer::chat_google_gemini()) You have to save and restart r after each of these actions. stores them in the environment and profile instead of my actual code
+
+#### Restart session: ctrl + shift + F10
+
+### Chattr
+
+```{r practicing chattr}
+# ctrl + o opens chat
+# prompt:show me the code to make a scatter plot showing the relationship between size and clarity of diamonds in the diamonds base data set 
+
+# Code:
+library(ggplot2)
+
+ggplot(data = diamonds, aes(x = carat, y = clarity)) +
+  geom_point()
+```
+
+### Inline Copilot
+
+```{r practicing inline copilot}
+#Load tidyverse and palmerpenguins libraries
+library(tidyverse)
+library(palmerpenguins)
+
+
+#Create a ggplot scatter plot using this penguins data
+#plot bill_len on the x axis and bill_dep on the y axis
+#color points by species and use geom_point with size 3
+#add a minimal theme and clean labels
+ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "Bill Length vs Bill Depth of Penguins",
+       x = "Bill Length (mm)",
+       y = "Bill Depth (mm)",
+       color = "Species")
+
+
+```
+
+```{r}
+#option A
+# please create a boxplot that compares flipper length across different species, faceted by island, use custom color palettes
+ggplot(data = penguins, aes(x = species, y = flipper_length_mm, fill = island)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Biscoe" = "lightblue", "Dream" = "lightgreen", "Torgersen" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Species",
+       y = "Flipper Length (mm)",
+       fill = "Island")
+
+# option b
+#generate a boxplot comparing flipper_len across different species, faceted by island, using custom color palettes. i would like the island names to be along the x axis and no labels for the species other than the fill
+ggplot(data = penguins, aes(x = island, y = flipper_length_mm, fill = species)) +
+  geom_boxplot() +
+  facet_wrap(~ species) +
+  scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Island",
+       y = "Flipper Length (mm)",
+       fill = "Species")
+# option c
+ggplot(data = penguins, aes(x = species, y = flipper_length_mm, fill = species)) +
+  geom_boxplot() +
+  facet_wrap(~ island) +
+  scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Species",
+       y = "Flipper Length (mm)",
+       fill = "Species")
+# option d
+ggplot(data = penguins, aes(x = island, y = flipper_length_mm, fill = species)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Island",
+       y = "Flipper Length (mm)",
+       fill = "Species")
+```
+
+I tried a couple different plots using different levels of copilot to help me out. I think option D is the best, even though it is not technically faceted. I think it is more visually appealing and easier to read than the other options.
+
+### Conditional Logic
+
+The classic base R conditional structure screens a single value at a time. Its basic anatomy uses round brackets () for the logical condition and curly braces {} for the action if that condition is true. Base r basic conditional logic only works for one value, can't use vectors.
+
+```{r practice}
+# Simple Example: Checking Sea Surface Temperature (SST)
+sst <- 30.2
+
+if (sst > 29.5) {
+  print("Warning: Marine heatwave threshold exceeded!")
+} else {
+  print("SST remains within baseline parameters.")
+}
+```
+
+### Evaluate Columns
+
+```{r}
+# Sample coral data
+coral_monitoring <- tibble(
+  site= c("A", "B", "c"),
+  depth_m = c(12, 35, 8)
+  )
+
+#classify depth using if_else
+#coral_monitoring <- 
+  coral_monitoring %>%
+  mutate(zone=if_else(depth_m>30,"Deep Reef", "Shallow Reef"))
+
+# mutate: add a new column
+# %>%: pipe one variable/object to a function
+```

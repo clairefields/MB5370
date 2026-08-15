@@ -16,6 +16,7 @@ source("Workshop 1.R")
 ### Install Packages
 
 ```{r}
+#| eval: false
 library("tidyverse")
 library("ggplot2")
 ```
@@ -32,13 +33,13 @@ library("ggplot2")
 #alpha=transparency, colour, size, shape
 
 #updated at the end of workshop 2:
-#ggplot(data = <DATA>) + 
-  #<GEOM_FUNCTION>(
-     #mapping = aes(<MAPPINGS>),
-     #stat = <STAT>, 
-     #position = <POSITION>
- # ) +
-#  <FACET_FUNCTION>
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(
+     mapping = aes(<MAPPINGS>),
+     stat = <STAT>, 
+     position = <POSITION>
+  ) +
+  <FACET_FUNCTION>
 ```
 
 ### Practice Plots
@@ -362,3 +363,4 @@ coral_monitoring <- tibble(
 # mutate: add a new column
 # %>%: pipe one variable/object to a function
 ```
+
